@@ -1,0 +1,17 @@
+export const INSTITUTE_COUNTRY_OPTIONS = [
+  { value: "", label: "All Countries" },
+  { value: "BD", label: "Bangladesh" },
+  { value: "US", label: "United States" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "IN", label: "India" },
+  { value: "PK", label: "Pakistan" },
+  { value: "AE", label: "United Arab Emirates" },
+  { value: "AU", label: "Australia" },
+  { value: "CA", label: "Canada" },
+  { value: "DE", label: "Germany" },
+  { value: "IE", label: "Ireland" },
+  { value: "BE", label: "Belgium" },
+  { value: "NL", label: "Netherlands" },
+  { value: "SA", label: "Saudi Arabia" },
+  { value: "VN", label: "Vietnam" },
+];

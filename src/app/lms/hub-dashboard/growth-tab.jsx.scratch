@@ -1,0 +1,526 @@
+
+function GrowthTab({ hubs, mutate }) {
+  const activeHubs = (Array.isArray(hubs) ? hubs : []).filter(
+    (hub) => hub.status === "active"
+  );
+  const [selectedHubId, setSelectedHubId] = useState(
+    activeHubs[0]?.id ? String(activeHubs[0].id) : ""
+  );
+  const [instituteQuery, setInstituteQuery] = useState("");
+  const [selectedInstituteId, setSelectedInstituteId] = useState("");
+  const [partnershipType, setPartnershipType] = useState("referral_partner");
+  const [operatorNotes, setOperatorNotes] = useState("");
+  const [expansionTier, setExpansionTier] = useState("local_spotlight");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+  useEffect(() => {
+    if (!selectedHubId && activeHubs[0]?.id) {
+      setSelectedHubId(String(activeHubs[0].id));
+    }
+  }, [activeHubs, selectedHubId]);
+
+  const selectedHub = activeHubs.find((hub) => String(hub.id) === selectedHubId);
+
+  const { data: instituteResults } = useSWR(
+    instituteQuery.trim().length >= 2
+      ? `/institute-directory/admin/institutes?status=published&q=${encodeURIComponent(
+          instituteQuery.trim()
+        )}&limit=8`
+      : null,
+    fetcher
+  );
+
+  const { data: linkData, mutate: mutateLinks } = useSWR(
+    selectedHubId ? `/learning-hub/${selectedHubId}/institute-links` : null,
+    fetcher
+  );
+  const { data: rankData, mutate: mutateRank } = useSWR(
+    selectedHubId ? `/learning-hub/${selectedHubId}/rank` : null,
+    fetcher
+  );
+  const { data: expansionData, mutate: mutateExpansion } = useSWR(
+    selectedHubId ? `/learning-hub/${selectedHubId}/expansion-applications` : null,
+    fetcher
+  );
+
+  const selectedRank = rankData?.data ?? rankData ?? null;
+  const selectedLinks = linkData?.items ?? linkData?.data?.items ?? [];
+  const selectedApplications = expansionData?.items ?? expansionData?.data?.items ?? [];
+  const instituteItems = instituteResults?.items ?? instituteResults?.data?.items ?? [];
+
+  const submitInstituteLink = async () => {
+    if (!selectedHubId || !selectedInstituteId) return;
+    setSubmitting(true);
+    setMessage("");
+    try {
+      await instance.post(`/learning-hub/${selectedHubId}/institute-links`, {
+        institute_id: selectedInstituteId,
+        partnership_type: partnershipType,
+        operator_notes: operatorNotes || undefined,
+      });
+      setOperatorNotes("");
+      setSelectedInstituteId("");
+      setInstituteQuery("");
+      setMessage("Partnership request submitted.");
+      await mutateLinks?.();
+      await mutate?.();
+      await mutateRank?.();
+    } catch (err) {
+      setMessage(err?.response?.data?.message || "Failed to submit request.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const submitExpansionApplication = async () => {
+    if (!selectedHubId) return;
+    setSubmitting(true);
+    setMessage("");
+    try {
+      await instance.post(`/learning-hub/${selectedHubId}/expansion-applications`, {
+        requested_tier: expansionTier,
+      });
+      setMessage("Expansion application submitted.");
+      await mutateExpansion?.();
+      await mutateRank?.();
+    } catch (err) {
+      setMessage(err?.response?.data?.message || "Failed to submit application.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (activeHubs.length === 0) {
+    return (
+      <div className="rounded-3xl border border-dashed border-gray-200 bg-white p-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="mx-auto w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
+            <TrendingUp className="w-8 h-8 text-gray-300" />
+        </div>
+        <p className="text-xl font-bold text-gray-800">No active hubs yet</p>
+        <p className="mt-2 text-sm text-gray-500 max-w-xs mx-auto">
+          Growth and partnership features will be unlocked once your hub is approved and active.
+        </p>
+      </div>
+    );
+  }
+
+  const tierOptions = [
+    { value: "referral_partner", label: "Referral Partner", desc: "Earn commission for student referrals" },
+    { value: "delivery_partner", label: "Delivery Partner", desc: "Host official institute course delivery" },
+    { value: "scholarship_partner", label: "Scholarship Partner", desc: "Distribute institute scholarships locally" },
+  ];
+
+  const expansionOptions = [
+    { value: "local_spotlight", label: "Local Spotlight", threshold: 60, icon: MapPin, color: "text-blue-500", bg: "bg-blue-50" },
+    { value: "regional_leader", label: "Regional Leader", threshold: 75, icon: TrendingUp, color: "text-purple-500", bg: "bg-purple-50" },
+    { value: "national_showcase", label: "National Showcase", threshold: 88, icon: Globe, color: "text-orange-500", bg: "bg-orange-50" },
+    { value: "elite_hub", label: "Elite Hub", threshold: 95, icon: Award, color: "text-amber-500", bg: "bg-amber-50" },
+  ];
+
+  const rankScore = selectedRank?.hub_rank_score ?? selectedHub?.hub_rank_score ?? 0;
+  const cityRank = selectedRank?.city_rank_position ?? selectedHub?.city_rank_position ?? "—";
+  const countryRank =
+    selectedRank?.country_rank_position ?? selectedHub?.country_rank_position ?? "—";
+  const isFeatured = Boolean(
+    selectedRank?.featured_city_rank ?? selectedHub?.featured_city_rank
+  );
+  const rankPct = Math.max(0, Math.min(100, Number(rankScore)));
+  const pendingLinksCount = selectedLinks.filter((item) => item.status === "pending").length;
+
+  const formatTierLabel = (value = "") =>
+    value
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const selectedInstituteName = instituteItems.find(i => i.institute_id === selectedInstituteId)?.canonical_name 
+    || selectedLinks.find(l => l.institute_id === selectedInstituteId)?.institute?.canonical_name;
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* ── Header ───────────────────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-[#0A4366] p-8 text-white shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
+        
+        <div className="relative flex flex-wrap items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-2 mb-3">
+                <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10">Growth Engine</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">
+              Institute <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-200">Partnerships</span>
+            </h1>
+            <p className="mt-4 text-blue-100/80 text-sm md:text-base leading-relaxed">
+              Scale your impact by connecting with premier institutes. Submit partnership requests, track your HubRank, and unlock regional expansion.
+            </p>
+          </div>
+
+          <div className="glass rounded-2xl p-1 shadow-inner border-white/20">
+            <select
+              value={selectedHubId}
+              onChange={(e) => setSelectedHubId(e.target.value)}
+              className="appearance-none bg-transparent pl-4 pr-10 py-3 text-sm font-bold text-white outline-none cursor-pointer"
+            >
+              {activeHubs.map((hub) => (
+                <option key={hub.id} value={hub.id} className="text-gray-900">
+                  {hub.hub_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 transition-transform hover:scale-[1.02]">
+                <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1">HubRank Score</p>
+                <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black">{rankScore}</span>
+                    <span className="text-xs font-semibold text-blue-300/60">/100</span>
+                </div>
+             </div>
+             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 transition-transform hover:scale-[1.02]">
+                <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1">Active Links</p>
+                <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black">{selectedLinks.filter(l => l.status === 'active').length}</span>
+                    <span className="text-xs font-semibold text-blue-300/60">Verified</span>
+                </div>
+             </div>
+             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 transition-transform hover:scale-[1.02]">
+                <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1">Pending Requests</p>
+                <div className="flex items-center gap-2">
+                    <span className="text-3xl font-black">{pendingLinksCount}</span>
+                    <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
+                </div>
+             </div>
+             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 transition-transform hover:scale-[1.02]">
+                <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1">City Position</p>
+                <div className="flex items-center gap-2">
+                    <span className="text-3xl font-black">#{cityRank}</span>
+                    {isFeatured && <Sparkles className="w-4 h-4 text-yellow-400" />}
+                </div>
+             </div>
+        </div>
+      </div>
+
+      {message && (
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-6 py-4 text-sm font-semibold text-emerald-700 flex items-center justify-between shadow-sm animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-3">
+             <CheckCircle className="w-5 h-5" />
+             {message}
+          </div>
+          <button onClick={() => setMessage("")} className="hover:opacity-70">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="grid gap-8 xl:grid-cols-[1.3fr,0.7fr]">
+        <div className="space-y-8">
+          {/* ── Partner Institutes Card ────────────────────────────────────────── */}
+          <section className="sp-card overflow-visible">
+            <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-black text-gray-900 leading-tight">Partner Institutes</h2>
+                <p className="text-sm text-gray-500 mt-1">Connect with academic partners to offer verified curricula.</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+                 <Building2 className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+
+            <div className="p-8 space-y-6">
+              <div className="relative">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block mb-2 px-1">
+                  Step 1: Search Approved Institutions
+                </label>
+                <div className={`flex items-center gap-3 rounded-2xl border transition-all px-4 py-4 ${showSearchDropdown ? 'border-primary ring-4 ring-primary/5 bg-white' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
+                  <Search className={`h-5 w-5 transition-colors ${showSearchDropdown ? 'text-primary' : 'text-gray-400'}`} />
+                  <input
+                    value={instituteQuery}
+                    onChange={(e) => {
+                        setInstituteQuery(e.target.value);
+                        setShowSearchDropdown(true);
+                    }}
+                    onFocus={() => setShowSearchDropdown(true)}
+                    placeholder="e.g. University of Dhaka, MIT..."
+                    className="w-full bg-transparent text-base font-medium outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                  {submitting && <RefreshCw className="w-4 h-4 text-primary animate-spin" />}
+                </div>
+
+                {/* Suggestive Search Dropdown */}
+                {showSearchDropdown && (instituteQuery.trim().length >= 2 || instituteItems.length > 0) && (
+                   <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-gray-100 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                       {instituteItems.length > 0 ? (
+                           <div className="max-h-72 overflow-auto">
+                               {instituteItems.map((item) => (
+                                   <button
+                                       key={item.institute_id}
+                                       type="button"
+                                       onClick={() => {
+                                           setSelectedInstituteId(item.institute_id);
+                                           setInstituteQuery(item.canonical_name);
+                                           setShowSearchDropdown(false);
+                                       }}
+                                       className={`w-full flex items-center justify-between px-5 py-4 text-left transition-colors border-b border-gray-50 last:border-0 ${
+                                           selectedInstituteId === item.institute_id
+                                               ? "bg-blue-50/80"
+                                               : "hover:bg-gray-50/80"
+                                       }`}
+                                   >
+                                       <div>
+                                           <p className="font-bold text-gray-900">{item.canonical_name}</p>
+                                           <div className="flex items-center gap-2 mt-1">
+                                               <span className="text-[10px] font-black uppercase tracking-widest text-blue-500 bg-blue-100/50 px-1.5 py-0.5 rounded">Tier {item.tier}</span>
+                                               <span className="text-xs text-gray-400 line-clamp-1">{item.accreditation_status} · {item.country_code}</span>
+                                           </div>
+                                       </div>
+                                       {selectedInstituteId === item.institute_id && (
+                                           <CheckCircle className="w-5 h-5 text-blue-600" />
+                                       )}
+                                   </button>
+                               ))}
+                           </div>
+                       ) : (
+                           <div className="p-8 text-center">
+                               <p className="text-sm text-gray-400">No matching institutes found.</p>
+                           </div>
+                       )}
+                   </div>
+                )}
+                {showSearchDropdown && (
+                    <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowSearchDropdown(false)} />
+                )}
+              </div>
+
+              {selectedInstituteId && (
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border border-blue-100/50 animate-in zoom-in-95 duration-200">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block mb-3">
+                      Step 2: Select Partnership Type & Add Notes
+                    </label>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-3">
+                            {tierOptions.map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => setPartnershipType(opt.value)}
+                                    className={`w-full p-4 rounded-xl text-left border transition-all ${
+                                        partnershipType === opt.value 
+                                        ? "border-blue-500 bg-white ring-4 ring-blue-50 shadow-sm" 
+                                        : "border-gray-200 bg-white hover:border-blue-200"
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className={`text-sm font-black ${partnershipType === opt.value ? 'text-blue-700' : 'text-gray-900'}`}>{opt.label}</span>
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${partnershipType === opt.value ? 'border-primary' : 'border-gray-300'}`}>
+                                            {partnershipType === opt.value && <div className="w-2 h-2 rounded-full bg-primary" />}
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 leading-snug">{opt.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex flex-col h-full">
+                            <textarea
+                            value={operatorNotes}
+                            onChange={(e) => setOperatorNotes(e.target.value)}
+                            placeholder="Introduce your hub or state any specific partnership requirements..."
+                            className="flex-1 w-full rounded-xl border border-gray-200 bg-white p-4 text-sm font-medium outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 placeholder:text-gray-400 min-h-[140px]"
+                            />
+                        </div>
+                    </div>
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            onClick={submitInstituteLink}
+                            disabled={submitting || !selectedInstituteId}
+                            className="btn-primary w-full md:w-auto px-10 h-14 rounded-2xl shadow-lg hover:shadow-primary/30 transition-all active:scale-95 disabled:grayscale"
+                        >
+                            {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <PlusCircle className="w-5 h-5" />}
+                            Submit Partnership Request
+                        </button>
+                    </div>
+                </div>
+              )}
+
+              {/* Current Requests List */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-4 px-1">
+                   <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight">Active & Pending Requests</h3>
+                   <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">{selectedLinks.length} TOTAL</span>
+                </div>
+                
+                <div className="space-y-3">
+                  {selectedLinks.length > 0 ? (
+                    selectedLinks.map((link) => (
+                      <div
+                        key={link.id}
+                        className="group flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100 group-hover:bg-blue-50 transition-colors">
+                                <Building2 className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-gray-900">{link.institute?.canonical_name ?? "Partner Institute"}</h4>
+                                <div className="flex items-center gap-3 mt-1">
+                                    <span className="text-xs font-semibold text-gray-500">{formatTierLabel(link.partnership_type)}</span>
+                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                    <span className="text-[10px] text-gray-400">{new Date(link.created_at || Date.now()).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                             <StatusBadge status={link.status} />
+                             <button className="p-2 text-gray-300 hover:text-gray-600 transition-colors">
+                                 <ChevronRight className="w-5 h-5" />
+                             </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-12 text-center rounded-3xl border-2 border-dashed border-gray-100">
+                        <p className="text-sm text-gray-400">No institute links yet. Start by searching above.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* ── Sidebar Column ─────────────────────────────────────────────────── */}
+        <div className="space-y-8">
+          {/* HubRank Detail Card */}
+          <section className="bg-white rounded-[2rem] border border-[#E8EDF2] p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-black text-gray-900">HubRank Engine</h2>
+                <p className="text-xs text-gray-400">Monthly algorithmic position.</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                 <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+              </div>
+            </div>
+
+            <div className="p-6 bg-gray-50/50 rounded-3xl border border-gray-100 text-center relative overflow-hidden group">
+                 <div className="relative z-10">
+                    <div className="text-5xl font-black text-gray-900 mb-2 group-hover:scale-110 transition-transform duration-500">
+                        {rankScore}
+                        <span className="text-lg text-gray-300 font-bold ml-1">/100</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full mt-4 max-w-[120px] mx-auto overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500" style={{ width: `${rankPct}%` }} />
+                    </div>
+                    <p className="mt-4 text-[11px] font-black uppercase text-gray-400 tracking-widest">Composite Score</p>
+                 </div>
+                 {/* Visual garnish */}
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-blue-100/30 rounded-full -mr-12 -mt-12 blur-2xl" />
+            </div>
+
+            <div className="mt-8 space-y-4">
+                 {[
+                     { label: "City Rank", value: `#${cityRank}`, icon: MapPin },
+                     { label: "Country Rank", value: `#${countryRank}`, icon: Globe },
+                     { label: "Featured Status", value: isFeatured ? "Active" : "Standard", icon: Sparkles, active: isFeatured },
+                 ].map((stat, i) => (
+                     <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-gray-50 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                            <stat.icon className={`w-4 h-4 ${stat.active ? 'text-amber-500' : 'text-gray-400'}`} />
+                            <span className="text-xs font-bold text-gray-500">{stat.label}</span>
+                        </div>
+                        <span className="font-black text-gray-900">{stat.value}</span>
+                     </div>
+                 ))}
+            </div>
+          </section>
+
+          {/* Expansion Unlock Card */}
+          <section className="bg-white rounded-[2rem] border border-[#E8EDF2] p-8 shadow-sm">
+            <h2 className="text-lg font-black text-gray-900 leading-tight">Expansion Tiers</h2>
+            <p className="mt-1 text-xs text-gray-400">Apply for premium promotion tiers when your HubRank meets the criteria.</p>
+            
+            <div className="mt-6 space-y-3">
+              {expansionOptions.map((opt) => {
+                const isEligible = rankScore >= opt.threshold;
+                const isSelected = expansionTier === opt.value;
+                const Icon = opt.icon;
+
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setExpansionTier(opt.value)}
+                    className={`group w-full relative overflow-hidden rounded-2xl border p-4 text-left transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary shadow-lg shadow-primary/20"
+                        : "border-gray-100 bg-white hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isSelected ? 'bg-white/20' : opt.bg}`}>
+                            <Icon className={`w-5 h-5 transition-colors ${isSelected ? 'text-white' : opt.color}`} />
+                        </div>
+                        <div>
+                            <div className={`text-sm font-black transition-colors ${isSelected ? 'text-white' : 'text-gray-900'}`}>{opt.label}</div>
+                            <div className={`text-[10px] font-bold transition-colors ${isSelected ? 'text-white/60' : 'text-gray-400'}`}>Requires {opt.threshold}+ Rank</div>
+                        </div>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase transition-colors ${
+                          isSelected
+                            ? "bg-white/20 text-white"
+                            : isEligible
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {isEligible ? "Eligible" : "Locked"}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={submitExpansionApplication}
+              disabled={submitting}
+              className="mt-8 btn-orange w-full h-14 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 disabled:grayscale"
+            >
+              {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5 fill-current" />}
+              Apply for Expansion Tier
+            </button>
+
+            {/* Application History - expandable/mini list */}
+            {selectedApplications.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-gray-50">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-4 px-1">Application History</p>
+                    <div className="space-y-3">
+                      {selectedApplications.map((app) => (
+                        <div
+                          key={app.id}
+                          className="flex items-center justify-between gap-3 p-4 rounded-xl bg-gray-50/50 border border-gray-100 h-16"
+                        >
+                          <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-lg bg-white border border-gray-100 text-gray-500">
+                                 {app.requested_tier.includes('local') ? <MapPin className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
+                              </div>
+                              <div>
+                                  <p className="text-xs font-black text-gray-900">{formatTierLabel(app.requested_tier)}</p>
+                                  <p className="text-[10px] text-gray-400 font-medium">${app.price_usd}/month</p>
+                              </div>
+                          </div>
+                          <StatusBadge status={app.status} />
+                        </div>
+                      ))}
+                    </div>
+                </div>
+            )}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}

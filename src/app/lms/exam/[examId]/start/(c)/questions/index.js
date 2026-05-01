@@ -1,0 +1,12 @@
+export { default as AudioQuestion } from "./audio-question";
+export { default as CodeWriting } from "./code-writing";
+export { default as DragDrop } from "./drag-drop";
+export { default as FillBlank } from "./fill-blank";
+export { default as HotspotQuestion } from "./hotspot-question";
+export { default as ImageChoice } from "./image-choice";
+export { default as MultipleChoiceMultiple } from "./multiple-choice-multiple";
+export { default as MultipleChoiceSingle } from "./multiple-choice-single";
+export { default as MultipleImagesMultiple } from "./multiple-images-multiple";
+export { default as TrueFalse } from "./true-false";
+export { default as VideoQuestion } from "./video-question";
+export { default as WriteDescriptive } from "./write-descriptive";

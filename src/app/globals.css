@@ -1,0 +1,258 @@
+/*
+  ScholarPASS — Brand Design System
+  Logo Colors: Teal-Blue #2884AB · Purple #8665AA · Orange #EC5E23 · Dark Navy #0A4366
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Brand Tokens ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Logo-exact palette ── */
+  --sp-blue:         #2884AB;   /* teal-blue from logo */
+  --sp-blue-deep:    #0A4366;   /* dark navy blue from logo */
+  --sp-blue-light:   #EBF5FA;   /* tint */
+  --sp-purple:       #8665AA;   /* purple from logo */
+  --sp-purple-light: #F3EEF8;   /* tint */
+  --sp-orange:       #EC5E23;   /* coral-orange from logo */
+  --sp-orange-light: #FEF0E9;   /* tint */
+
+  /* ── Neutrals ── */
+  --sp-white:  #FFFFFF;
+  --sp-off:    #F8FAFC;
+  --sp-border: #E8EDF2;
+  --sp-ink:    #0F1A24;         /* near-black headings */
+  --sp-muted:  #64748B;         /* body text */
+  --sp-light:  #94A3B8;         /* captions */
+
+  /* ── Shadcn compat ── */
+  --background:            0 0% 100%;
+  --foreground:            210 40% 8%;
+  --card:                  0 0% 100%;
+  --card-foreground:       210 40% 8%;
+  --popover:               0 0% 100%;
+  --popover-foreground:    210 40% 8%;
+  --primary:               200 61% 42%;   /* #2884AB */
+  --primary-foreground:    0 0% 100%;
+  --secondary:             276 31% 54%;   /* #8665AA */
+  --secondary-foreground:  0 0% 100%;
+  --muted:                 210 17% 95%;
+  --muted-foreground:      215 16% 47%;
+  --accent:                18 84% 52%;    /* #EC5E23 */
+  --accent-foreground:     0 0% 100%;
+  --destructive:           0 84% 60%;
+  --destructive-foreground:0 0% 98%;
+  --border:                214 20% 90%;
+  --input:                 214 20% 90%;
+  --ring:                  200 61% 42%;
+  --radius:                0.5rem;
+
+  /* ── Typography ── */
+  --font-display: var(--font-display, 'Instrument Serif', Georgia, serif);
+  --font-body:    var(--font-body, 'DM Sans', system-ui, sans-serif);
+
+  /* legacy */
+  --bodyBg:       #F8FAFC;
+  --headingColor: #0F1A24;
+  --contentColor: #64748B;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+@layer base {
+  body {
+    font-family: var(--font-body);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply antialiased;
+    background-color: var(--sp-white);
+    color: var(--sp-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-body);
+    color: var(--sp-ink);
+    line-height: 1.15;
+    @apply tracking-tight font-bold;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+}
+
+/* ── Utility components ─────────────────────────────────────────────────────── */
+@layer components {
+  .container {
+    @apply max-w-6xl mx-auto px-5 sm:px-8 lg:px-10;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sp-light);
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding: 0 1.25rem;
+    border-radius: 0.5rem;
+    background: var(--sp-blue);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: background 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(40,132,171,.25);
+  }
+  .btn-primary:hover {
+    background: var(--sp-blue-deep);
+    box-shadow: 0 4px 16px rgba(40,132,171,.35);
+  }
+
+  .btn-orange {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding: 0 1.25rem;
+    border-radius: 0.5rem;
+    background: var(--sp-orange);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: background 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(236,94,35,.25);
+  }
+  .btn-orange:hover {
+    background: #d04f18;
+    box-shadow: 0 4px 16px rgba(236,94,35,.35);
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding: 0 1.25rem;
+    border-radius: 0.5rem;
+    border: 1.5px solid var(--sp-border);
+    color: var(--sp-ink);
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-outline:hover {
+    border-color: var(--sp-blue);
+    background: var(--sp-blue-light);
+  }
+
+  /* ── Cards ── */
+  .sp-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid var(--sp-border);
+    box-shadow: 0 2px 12px rgba(15,26,36,.05);
+    transition: box-shadow 0.25s, transform 0.25s;
+  }
+  .sp-card:hover {
+    box-shadow: 0 8px 28px rgba(15,26,36,.10);
+    transform: translateY(-2px);
+  }
+
+  /* ── Glass ── */
+  .glass {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.7);
+  }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    font-weight: 800;
+    color: var(--sp-ink);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Accent underline ── */
+  .underline-sp {
+    text-decoration: underline;
+    text-decoration-color: var(--sp-orange);
+    text-underline-offset: 5px;
+    text-decoration-thickness: 3px;
+  }
+}
+
+/* ── Gradient helpers ───────────────────────────────────────────────────────── */
+.gradient-sp-text {
+  background: linear-gradient(135deg, var(--sp-blue) 0%, var(--sp-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-sp-bg {
+  background: linear-gradient(135deg, var(--sp-blue-light) 0%, var(--sp-purple-light) 100%);
+}
+
+.gradient-hero-bg {
+  background: linear-gradient(160deg, #EBF5FA 0%, #F3EEF8 60%, #FEF0E9 100%);
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────────── */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .6; transform: scale(1.4); }
+}
+
+.float-gentle { animation: float-gentle 5s ease-in-out infinite; }
+.slide-up     { animation: slide-up-fade 0.55s ease-out both; }
+.pulse-dot    { animation: pulse-dot 1.8s ease-in-out infinite; }
+
+.stagger > * { animation: slide-up-fade 0.5s ease-out both; }
+.stagger > *:nth-child(1) { animation-delay: 0.0s; }
+.stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.stagger > *:nth-child(5) { animation-delay: 0.32s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fillWidth {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes expandWidth {
+  from { max-width: 0; }
+  to { max-width: 100%; }
+}

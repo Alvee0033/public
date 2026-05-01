@@ -1,0 +1,225 @@
+"use client";
+
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function PaymentResultPage() {
+  const searchParams = useSearchParams();
+  const courseId = searchParams.get("courseId");
+  const router = useRouter();
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [enrollmentStatus, setEnrollmentStatus] = useState("pending"); // pending, success, error
+  const [effectiveCourseId, setEffectiveCourseId] = useState(null);
+
+  useEffect(() => {
+    // Extract courseId from URL if not available from searchParams
+    // This is a fallback in case the searchParams method doesn't work
+    let tempCourseId = courseId;
+    if (!tempCourseId && typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // Try to get the course ID from our custom parameter
+      tempCourseId = urlParams.get('tutors_course_id');
+
+      // If not found, try the old parameter name as fallback
+      if (!tempCourseId) {
+        tempCourseId = urlParams.get('courseId');
+      }
+
+      // If still not found, try to get from localStorage
+      if (!tempCourseId && typeof localStorage !== 'undefined') {
+        tempCourseId = localStorage.getItem('last_purchased_course_id');
+      }
+    }
+
+    // Update the state with the effective course ID
+    setEffectiveCourseId(tempCourseId);
+
+    // Extract payment_intent from URL
+    let paymentIntentId = null;
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      paymentIntentId = urlParams.get('payment_intent');
+    }
+
+   
+
+    // If courseId is present, verify enrollment
+    if (tempCourseId && !isVerifying && !isRedirecting) {
+      const verifyEnrollment = async () => {
+        try {
+          setIsVerifying(true);
+
+          // First try to verify if the enrollment exists
+          const response = await fetch("/api/courses/verify-enrollment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ courseId: tempCourseId }),
+          });
+
+          // We need to handle the response differently to avoid the "body already read" error
+          let responseData;
+
+          try {
+            responseData = await response.json();
+
+            if (!response.ok) {
+              throw new Error(responseData.error || "Failed to verify enrollment");
+            }
+
+            // If we get here, the enrollment was verified successfully in the database
+            setEnrollmentStatus("success");
+          } catch (err) {
+            if (!response.ok) {
+              setEnrollmentStatus("error");
+
+              // If verification fails, try to manually create the enrollment
+
+              if (paymentIntentId) {
+                try {
+                  const manualEnrollResponse = await fetch("/api/courses/manual-enroll", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      courseId: tempCourseId,
+                      paymentIntentId: paymentIntentId
+                    }),
+                  });
+
+                  if (manualEnrollResponse.ok) {
+                    const manualEnrollData = await manualEnrollResponse.json();
+                    setEnrollmentStatus("success");
+                    responseData = manualEnrollData;
+                  } else {
+                    console.error("❌ MANUAL ENROLLMENT FAILED");
+                    throw new Error("Failed to create enrollment manually");
+                  }
+                } catch (manualErr) {
+                  console.error("Manual enrollment error:", manualErr);
+                  throw new Error("Failed to verify and manually create enrollment");
+                }
+              } else {
+                console.error("❌ Payment intent ID is missing, cannot create enrollment manually");
+                throw new Error("Failed to verify enrollment");
+              }
+            } else {
+              // If we can't parse the response but the status is OK, we'll proceed with the redirect
+              responseData = {};
+              setEnrollmentStatus("success");
+            }
+          }
+
+          // We'll use the local status variable instead of the state variable
+          // because the state update might not be reflected immediately
+          const status = responseData && response.ok ? "success" : "error";
+
+          // Only redirect if enrollment was successful
+          if (status === "success") {
+            // Set a flag to redirect after a short delay
+            setIsRedirecting(true);
+
+            setTimeout(() => {
+              router.push(`/learninghub/course-dashboard/${tempCourseId}`);
+            }, 1500); // Reduced delay to 1.5 seconds
+          } else {
+          }
+        } catch (error) {
+          console.error("❌ VERIFICATION ERROR:", error);
+          console.error("💾 DATABASE ERROR: Failed to verify enrollment in database");
+          setVerificationError(error.message);
+
+          // Even if verification fails, we'll still redirect to the course dashboard
+          // This ensures the user can access their course even if there's an API issue
+          setIsRedirecting(true);
+          setTimeout(() => {
+            router.push(`/learninghub/course-dashboard/${tempCourseId}`);
+          }, 3000); // Longer delay to show the error message
+        } finally {
+          setIsVerifying(false);
+        }
+      };
+
+      verifyEnrollment();
+    }
+  }, [courseId, router, isVerifying, isRedirecting]);
+
+  return (
+    <div className="min-h-[50vh] bg-gray-50 flex items-center justify-center py-10">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="h-12 w-12 text-green-500" />
+          </div>
+          <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+          <CardDescription>
+            Thank you for your payment. Your transaction has been completed
+            successfully.
+
+            {enrollmentStatus === "pending" && isVerifying && (
+              <p className="mt-2 text-blue-600">
+                Verifying your enrollment...
+              </p>
+            )}
+
+            {enrollmentStatus === "success" && (
+              <p className="mt-2 text-green-600">
+                Your enrollment has been confirmed! You now have access to the course.
+              </p>
+            )}
+
+            {isRedirecting && (
+              <p className="mt-2 text-blue-600">
+                Redirecting to your course dashboard...
+              </p>
+            )}
+
+            {enrollmentStatus === "error" && (
+              <p className="mt-2 text-amber-600">
+                We received your payment, but there was an issue confirming your enrollment.
+                Don't worry - our team has been notified and will fix this for you shortly.
+                You can still access your course by clicking the button below.
+              </p>
+            )}
+
+            {verificationError && (
+              <p className="mt-2 text-red-600">
+                {verificationError}
+              </p>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center gap-4">
+          {effectiveCourseId ? (
+            <Button
+              onClick={() => router.push(`/learninghub/course-dashboard/${effectiveCourseId}`)}
+              disabled={isVerifying}
+            >
+              Go to Course Dashboard
+            </Button>
+          ) : (
+            <Link href="/learninghub/courses">
+              <Button>Browse Courses</Button>
+            </Link>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
