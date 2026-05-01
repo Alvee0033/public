@@ -1,204 +1,169 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Bot, GraduationCap, Rocket, Users, Award, BookOpen, Brain, TrendingUp, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  GraduationCap,
+  Building2,
+  Sparkles,
+  HeartHandshake,
+} from "lucide-react";
+
+const TRUST_POINTS = [
+  "Backed by 1,200+ institute partners",
+  "Verified scholarship matches",
+  "Live human tutors in 40+ subjects",
+];
 
 const STATS = [
-  { val: "$1.2B+",  label: "In Fundings",    icon: Award },
-  { val: "500K+",   label: "Learners",        icon: Users },
-  { val: "25K+",    label: "Placements",      icon: Rocket },
-  { val: "10,000+", label: "Live Programs",   icon: GraduationCap },
+  { value: "120K+", label: "Active Learners" },
+  { value: "$48M",  label: "Scholarships Awarded" },
+  { value: "1.2K",  label: "Partner Institutes" },
+  { value: "98%",   label: "Tutor Satisfaction" },
 ];
 
-const FEATURES = [
-  { icon: Brain,       label: "AI Tutor Match" },
-  { icon: Award,       label: "Verified Paths" },
-  { icon: BookOpen,    label: "Career Bootcamps" },
-  { icon: TrendingUp,  label: "Progress Tracking" },
+const PATHS = [
+  {
+    icon: GraduationCap,
+    label: "I'm a Learner",
+    desc: "Find scholarships, tutoring, and bootcamps tailored to you.",
+    href: "/get-started",
+    accent: "blue",
+  },
+  {
+    icon: Building2,
+    label: "I'm an Institute",
+    desc: "List programs and reach motivated students worldwide.",
+    href: "/partnership-program",
+    accent: "purple",
+  },
+  {
+    icon: HeartHandshake,
+    label: "I'm a Sponsor",
+    desc: "Fund education and track measurable real-world impact.",
+    href: "/scholarpass-sponsors",
+    accent: "orange",
+  },
 ];
 
-const TRUST_LOGOS = ["Harvard Extension", "MIT OpenCourseWare", "Khan Academy", "Coursera", "College Board", "NACAC"];
+const accentMap: Record<string, string> = {
+  blue: "bg-[var(--sp-blue-light)] text-[var(--sp-navy)]",
+  purple: "bg-[var(--sp-purple-light)] text-[var(--sp-purple)]",
+  orange: "bg-[var(--sp-orange-light)] text-[var(--sp-orange)]",
+};
 
 export default function HeroSection() {
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ background: "var(--sp-off)", minHeight: "calc(100vh - 96px)" }}
-    >
-      {/* Subtle top border accent */}
+    <section className="relative overflow-hidden bg-white">
+      <div aria-hidden="true" className="absolute inset-0 bg-dotgrid opacity-50" />
+
       <div
-        className="absolute top-0 left-0 right-0 h-[3px]"
-        style={{ background: "linear-gradient(90deg, var(--sp-blue) 0%, var(--sp-purple) 50%, var(--sp-orange) 100%)" }}
         aria-hidden="true"
+        className="absolute -top-32 -right-24 h-[480px] w-[480px] rounded-full"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(40,132,171,.18), transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute -bottom-32 -left-32 h-[420px] w-[420px] rounded-full"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(134,101,170,.14), transparent 70%)",
+        }}
       />
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col" style={{ minHeight: "calc(100vh - 96px)" }}>
-        
-        {/* Main grid */}
-        <div className="flex-1 grid lg:grid-cols-2 gap-10 xl:gap-20 items-center py-12 lg:py-0">
-
-          {/* ── Left: Content ── */}
-          <div className="flex flex-col justify-center">
-
-            {/* Label */}
-            <div className="flex items-center gap-2 mb-5 anim-fade-up anim-d0">
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest text-white"
-                style={{ background: "var(--sp-navy)" }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
-                Platform Now Live
-              </span>
-            </div>
-
-            {/* Headline */}
-            <h1
-              className="font-bold leading-[1.1] tracking-tight mb-4 anim-fade-up anim-d1"
-              style={{ fontSize: "clamp(2.25rem, 5vw, 3.75rem)", color: "var(--sp-ink)" }}
-            >
-              Unlock Your <br />
-              <span style={{ color: "var(--sp-blue)" }}>Academic Future.</span>
-            </h1>
-
-            {/* Subtext */}
-            <p
-              className="leading-relaxed mb-6 anim-fade-up anim-d2"
-              style={{ fontSize: "clamp(0.9rem, 1.6vw, 1.0625rem)", color: "var(--sp-muted)", maxWidth: "460px" }}
-            >
-              ScholarPASS connects K-12 students to AI tutoring, physical learning hubs, and job-ready bootcamps — all in one platform.
-            </p>
-
-            {/* Feature chips */}
-            <ul className="flex flex-wrap gap-2 mb-7 anim-fade-up anim-d3" aria-label="Platform features">
-              {FEATURES.map(({ icon: Icon, label }) => (
-                <li
-                  key={label}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border text-[12px] font-medium"
-                  style={{ borderColor: "var(--sp-border)", color: "var(--sp-muted)" }}
-                >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--sp-blue)" }} aria-hidden="true" />
-                  {label}
-                </li>
-              ))}
-            </ul>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-3 mb-10 anim-fade-up anim-d4">
-              <Link
-                href="/courses"
-                className="inline-flex items-center gap-2 px-6 h-11 rounded-lg font-bold text-[14px] text-white transition-all group"
-                style={{ background: "var(--sp-orange)", boxShadow: "0 2px 8px rgba(236,94,35,.25)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#d04e18"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--sp-orange)"; }}
-              >
-                Explore Courses
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-              </Link>
-              <Link
-                href="/learninghubs"
-                className="inline-flex items-center gap-2 px-5 h-11 rounded-lg text-[14px] font-semibold border transition-all"
-                style={{ borderColor: "var(--sp-border)", color: "var(--sp-ink)", background: "white" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--sp-blue)"; e.currentTarget.style.color = "var(--sp-blue)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--sp-border)"; e.currentTarget.style.color = "var(--sp-ink)"; }}
-              >
-                Find Learning Hubs
-              </Link>
-            </div>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 anim-fade-up anim-d5">
-              {STATS.map(({ val, label, icon: Icon }) => (
-                <div
-                  key={label}
-                  className="flex flex-col items-start px-4 py-3 rounded-xl bg-white border"
-                  style={{ borderColor: "var(--sp-border)" }}
-                >
-                  <Icon className="w-4 h-4 mb-2 flex-shrink-0" style={{ color: "var(--sp-blue)" }} aria-hidden="true" />
-                  <span className="text-[1.25rem] font-extrabold leading-none tracking-tight" style={{ color: "var(--sp-ink)" }}>{val}</span>
-                  <span className="text-[10px] font-semibold mt-1 uppercase tracking-widest" style={{ color: "var(--sp-light)" }}>{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Right: Image ── */}
-          <div className="relative flex items-center justify-center anim-scale-in">
-            {/* Image container */}
-            <div
-              className="relative w-full rounded-2xl overflow-hidden"
-              style={{
-                boxShadow: "0 8px 40px rgba(10,67,102,.12), 0 2px 8px rgba(0,0,0,.06)",
-                aspectRatio: "4/3",
-                border: "1px solid var(--sp-border)",
-              }}
-            >
-              <Image
-                src="/images/diverse-students-collaborating-on-digital-devices-.jpg"
-                alt="Students collaborating on digital learning"
-                fill
-                priority
-                fetchPriority="high"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-              />
-            </div>
-
-            {/* AI chip — floating */}
-            <div
-              className="absolute -top-4 -right-4 hidden md:flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg anim-float"
-              style={{ background: "var(--sp-navy)", border: "1px solid rgba(255,255,255,.12)" }}
-              aria-hidden="true"
-            >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "var(--sp-blue)" }}>
-                <Bot className="w-4.5 h-4.5 text-white" />
-              </div>
-              <div>
-                <div className="text-[11px] font-bold tracking-wide text-white">AI Agent</div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-[10px] text-white/60 font-medium">Active</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Plus chip — floating */}
-            <div
-              className="absolute -bottom-4 -left-4 hidden md:flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg"
-              style={{
-                background: "var(--sp-purple)",
-                border: "1px solid rgba(255,255,255,.12)",
-                animation: "floatY 5s ease-in-out 1s infinite",
-              }}
-              aria-hidden="true"
-            >
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
-                <Award className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <div className="text-[11px] font-bold text-white uppercase tracking-wide">SP Plus Credit</div>
-                <div className="text-[13px] font-extrabold text-amber-300">$120 Wallet</div>
-              </div>
-            </div>
-          </div>
+      <div className="container relative pt-12 pb-16 md:pt-20 md:pb-24 lg:pt-24 lg:pb-28">
+        <div className="anim-fade-up anim-d0">
+          <span className="sp-label sp-label-blue">
+            <Sparkles className="w-3 h-3" aria-hidden="true" />
+            One platform. Every path forward.
+          </span>
         </div>
 
-        {/* ── Trust bar ───────────────────────────────────────────── */}
-        <div
-          className="border-t py-4 flex items-center gap-6 sm:gap-10 overflow-x-auto no-scrollbar"
-          style={{ borderColor: "var(--sp-border)" }}
-          aria-label="Trusted by"
+        <h1 className="h-display mt-5 max-w-4xl text-balance anim-fade-up anim-d1">
+          Education built around{" "}
+          <span className="font-display italic font-normal text-[var(--sp-orange)]">
+            your future
+          </span>
+          ,
+          <br className="hidden md:block" />
+          not the other way around.
+        </h1>
+
+        <p className="lede mt-6 max-w-2xl text-pretty anim-fade-up anim-d2">
+          ScholarPASS unites scholarships, expert tutoring, accredited bootcamps,
+          and a global learning hub network — so every learner gets matched,
+          mentored, and funded on a single coherent path.
+        </p>
+
+        <div className="mt-9 flex flex-wrap items-center gap-3 anim-fade-up anim-d3">
+          <Link href="/get-started" className="btn-primary btn-lg">
+            Start free
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link href="/scholarpass-plus" className="btn-outline btn-lg">
+            Explore Plus
+          </Link>
+        </div>
+
+        <ul
+          className="mt-7 flex flex-wrap gap-x-6 gap-y-2 anim-fade-up anim-d4"
+          aria-label="Trust signals"
         >
-          <span className="eyebrow flex-shrink-0">Trusted by</span>
-          {TRUST_LOGOS.map((name) => (
-            <span
-              key={name}
-              className="text-[12px] font-semibold flex-shrink-0 transition-opacity opacity-40 hover:opacity-70 cursor-default select-none"
-              style={{ color: "var(--sp-ink)" }}
+          {TRUST_POINTS.map((point) => (
+            <li
+              key={point}
+              className="flex items-center gap-2 text-[13.5px] text-[var(--sp-muted)]"
             >
-              {name}
-            </span>
+              <CheckCircle2
+                className="w-4 h-4 text-[var(--sp-blue)] flex-shrink-0"
+                aria-hidden="true"
+                strokeWidth={2.25}
+              />
+              {point}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-14 lg:mt-16 grid gap-4 sm:grid-cols-3 anim-fade-up anim-d5">
+          {PATHS.map(({ icon: Icon, label, desc, href, accent }) => (
+            <Link
+              key={label}
+              href={href}
+              className="sp-card group p-6 sm:p-7 flex flex-col"
+            >
+              <span
+                className={`inline-flex items-center justify-center h-11 w-11 rounded-[10px] ${accentMap[accent]}`}
+                aria-hidden="true"
+              >
+                <Icon className="w-5 h-5" strokeWidth={2} />
+              </span>
+              <h3 className="mt-5 text-[1.0625rem] font-semibold tracking-tight text-[var(--sp-ink)]">
+                {label}
+              </h3>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--sp-muted)]">
+                {desc}
+              </p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--sp-navy)] group-hover:text-[var(--sp-blue)] transition-colors">
+                Continue
+                <ArrowRight
+                  className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                  strokeWidth={2.25}
+                />
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-16 lg:mt-20 grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-6 pt-10 border-t border-[var(--sp-border)] anim-fade-up anim-d6">
+          {STATS.map((s) => (
+            <div key={s.label}>
+              <div className="stat-num">{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+            </div>
           ))}
         </div>
       </div>
