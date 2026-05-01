@@ -1,228 +1,185 @@
 "use client";
 
 import React from "react";
-import {
-  Code,
-  Shield,
-  ArrowRight,
-  BrainCircuit,
-  Layers,
-} from "lucide-react";
+import { Code, Shield, ArrowRight, BrainCircuit, Layers, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 const BOOTCAMPS = [
   {
     title: "Full Stack Web Dev",
     tag: "Software Engineering",
     icon: Code,
-    accent: "var(--sp-blue)",
     image: "/images/web-development-coding.png",
   },
   {
     title: "AI & Data Science",
     tag: "Advanced Analytics",
     icon: BrainCircuit,
-    accent: "var(--sp-purple)",
     image: "/images/data-science-analytics.jpg",
   },
   {
     title: "Cybersecurity Pro",
     tag: "Network Security",
     icon: Shield,
-    accent: "var(--sp-orange)",
     image: "/images/cybersecurity-network-security.jpg",
   },
   {
-    title: "AWS Cloud Arch",
+    title: "AWS Cloud Architecture",
     tag: "Infrastructure",
     icon: Layers,
-    accent: "var(--sp-blue)",
     image: "/images/aws-cloud-computing.jpg",
   },
 ];
 
+const CARD_PERKS = [
+  "Industry Certifications",
+  "Mentored Projects",
+  "Career Placement Support",
+];
+
 export default function CareerBootcampsSection() {
   return (
-    <section className="py-20 relative overflow-hidden bg-slate-50">
-      {/* Light ambient wash — no dark texture */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 50% at 90% 0%, rgba(40,132,171,.08) 0%, transparent 55%)," +
-              "radial-gradient(ellipse 60% 45% at 0% 100%, rgba(134,101,170,.08) 0%, transparent 50%)",
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.35]"
-          style={{
-            backgroundImage: "radial-gradient(circle at 1px 1px, rgba(40,132,171,.12) 1px, transparent 0)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-      </div>
+    <section
+      className="section-py relative overflow-hidden"
+      style={{ background: "var(--sp-off)" }}
+    >
+      {/* Subtle dot grid */}
+      <div
+        className="absolute inset-0 opacity-30 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, var(--sp-gray200) 1px, transparent 0)",
+          backgroundSize: "28px 28px",
+        }}
+        aria-hidden="true"
+      />
 
-      <div className="container relative z-10 px-4 mx-auto">
-        <div className="flex flex-col lg:flex-row items-center justify-between mb-20 gap-10">
-          <div className="text-left space-y-4 max-w-2xl">
-            <Badge
-              variant="default"
-              className="border-0 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] text-white shadow-sm"
-              style={{ background: "linear-gradient(135deg, var(--sp-blue), var(--sp-purple))" }}
+      <div className="container relative">
+
+        {/* Header row */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-8">
+          <div className="max-w-2xl">
+            <span
+              className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest text-white mb-4"
+              style={{ background: "linear-gradient(90deg, var(--sp-blue), var(--sp-purple))" }}
             >
               Career Accelerators
-            </Badge>
-            <h2
-              className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight"
-              style={{ color: "var(--sp-ink)" }}
-            >
-              Future-Proof <br />
-              <span
-                className="text-transparent bg-clip-text bg-gradient-to-r"
-                style={{
-                  backgroundImage: "linear-gradient(90deg, var(--sp-blue), var(--sp-purple))",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                }}
-              >
-                Your Career path.
-              </span>
+            </span>
+            <h2 className="section-title">
+              Future-Proof{" "}
+              <span className="gradient-sp-text">Your Career.</span>
             </h2>
-            <p className="text-lg font-medium leading-relaxed" style={{ color: "var(--sp-muted)" }}>
-              Job-guaranteed training programs designed by industry leads at Google, Meta, and AWS. Get hired in 6 months.
+            <p className="section-sub mt-3">
+              Job-guaranteed training programs designed by industry leads at Google, Meta, and AWS. Get hired in 6 months or your money back.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="text-center sm:text-right">
-              <div className="text-4xl font-black tracking-tighter" style={{ color: "var(--sp-ink)" }}>
-                98%
-              </div>
-              <div
-                className="text-[10px] font-bold uppercase tracking-widest mt-1"
-                style={{ color: "var(--sp-light)" }}
-              >
-                Placement Rate
-              </div>
+          <div className="flex items-center gap-8">
+            <div className="text-center">
+              <div className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--sp-ink)" }}>98%</div>
+              <div className="stat-label">Placement Rate</div>
             </div>
-            <div className="w-px h-12 bg-slate-200 hidden sm:block" />
-            <div className="text-center sm:text-right">
-              <div className="text-4xl font-black tracking-tighter" style={{ color: "var(--sp-ink)" }}>
-                $85K
-              </div>
-              <div
-                className="text-[10px] font-bold uppercase tracking-widest mt-1"
-                style={{ color: "var(--sp-light)" }}
-              >
-                Avg Starting Salary
-              </div>
+            <div className="w-px h-10 bg-[var(--sp-border)]" aria-hidden="true" />
+            <div className="text-center">
+              <div className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--sp-ink)" }}>$85K</div>
+              <div className="stat-label">Avg Starting Salary</div>
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Cards grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {BOOTCAMPS.map((camp, i) => (
-            <div
-              key={i}
-              className="group relative flex flex-col bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-              style={{ animation: `fadeIn 0.6s ease-out ${i * 0.1}s both` }}
+            <article
+              key={camp.title}
+              className="group flex flex-col bg-white rounded-xl border overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              style={{ borderColor: "var(--sp-border)", animationDelay: `${i * 60}ms` }}
             >
-              <div className="relative h-44 overflow-hidden">
+              <div className="relative h-44 overflow-hidden bg-slate-100">
                 <Image
                   src={camp.image}
                   alt={camp.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div
                   className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(to top, rgba(248,250,252,.95) 0%, transparent 45%)",
-                  }}
+                  style={{ background: "linear-gradient(to top, rgba(248,250,252,.9) 0%, transparent 50%)" }}
+                  aria-hidden="true"
                 />
-                <div className="absolute bottom-4 left-6">
+                <div className="absolute bottom-3 left-4">
                   <div
-                    className="p-3 rounded-xl border backdrop-blur-sm"
-                    style={{
-                      background: "rgba(255,255,255,.92)",
-                      borderColor: "#E8EDF2",
-                      color: camp.accent,
-                    }}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border"
+                    style={{ borderColor: "var(--sp-border)", color: "var(--sp-blue)" }}
+                    aria-hidden="true"
                   >
-                    <camp.icon className="w-6 h-6" />
+                    <camp.icon className="w-5 h-5" />
                   </div>
                 </div>
               </div>
 
-              <div className="p-8 space-y-4">
-                <Badge
-                  variant="outline"
-                  className="text-[9px] font-black uppercase tracking-widest border-slate-200"
-                  style={{ color: "var(--sp-muted)" }}
+              <div className="p-5 flex flex-col flex-1">
+                <span
+                  className="inline-block text-[10px] font-bold uppercase tracking-widest mb-2"
+                  style={{ color: "var(--sp-light)" }}
                 >
                   {camp.tag}
-                </Badge>
-                <h3
-                  className="text-xl font-black uppercase tracking-tight transition-colors group-hover:opacity-90"
-                  style={{ color: "var(--sp-ink)" }}
-                >
+                </span>
+                <h3 className="text-[15px] font-bold mb-3" style={{ color: "var(--sp-ink)" }}>
                   {camp.title}
                 </h3>
 
-                <ul className="space-y-3 pt-2">
-                  {[1, 2, 3].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-xs font-bold" style={{ color: "var(--sp-muted)" }}>
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: camp.accent }} />
-                      Certifications Included
+                <ul className="space-y-1.5 mb-4" aria-label="Program benefits">
+                  {CARD_PERKS.map((perk) => (
+                    <li key={perk} className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--sp-blue)" }} aria-hidden="true" />
+                      <span className="text-[12px] font-medium" style={{ color: "var(--sp-muted)" }}>{perk}</span>
                     </li>
                   ))}
                 </ul>
 
-                <button
-                  type="button"
-                  className="pt-4 flex items-center gap-2 font-extrabold text-[10px] uppercase tracking-widest transition-colors group/btn"
+                <Link
+                  href="/career-bootcamps"
+                  className="mt-auto inline-flex items-center gap-1.5 text-[12.5px] font-bold transition-colors group/link"
                   style={{ color: "var(--sp-blue)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sp-navy)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sp-blue)"; }}
                 >
                   Learn More
-                  <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                </button>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" aria-hidden="true" />
+                </Link>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
-        {/* CTA — light card */}
+        {/* CTA banner */}
         <div
-          className="mt-20 p-8 lg:p-12 rounded-[2.5rem] border flex flex-col items-center text-center space-y-8"
+          className="mt-14 p-8 lg:p-12 rounded-2xl border flex flex-col items-center text-center gap-6"
           style={{
-            background: "linear-gradient(135deg, #EBF5FA 0%, #F3EEF8 50%, #FEF0E9 100%)",
-            borderColor: "#E8EDF2",
-            boxShadow: "0 20px 50px rgba(40,132,171,.12)",
+            background: "linear-gradient(135deg, var(--sp-blue-light) 0%, var(--sp-purple-light) 100%)",
+            borderColor: "rgba(40,132,171,.15)",
           }}
         >
-          <div className="space-y-3">
-            <h4 className="text-3xl font-black tracking-tight" style={{ color: "var(--sp-ink)" }}>
+          <div>
+            <h4 className="text-2xl font-bold tracking-tight mb-2" style={{ color: "var(--sp-ink)" }}>
               Not sure which path to take?
             </h4>
-            <p className="font-bold max-w-xl" style={{ color: "var(--sp-muted)" }}>
+            <p className="text-[14px] font-medium max-w-md mx-auto" style={{ color: "var(--sp-muted)" }}>
               Take our AI Career Quiz and find your perfect future in under 2 minutes.
             </p>
           </div>
-          <button
-            type="button"
-            className="h-14 px-12 rounded-2xl font-black text-lg transition-all transform hover:scale-[1.02] shadow-lg border-0 text-white"
-            style={{
-              background: "linear-gradient(135deg, var(--sp-blue) 0%, var(--sp-purple) 100%)",
-              boxShadow: "0 8px 28px rgba(40,132,171,.35)",
-            }}
+          <Link
+            href="/career-bootcamps"
+            className="inline-flex items-center gap-2 px-8 h-12 rounded-lg text-[14px] font-bold text-white transition-all"
+            style={{ background: "var(--sp-navy)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sp-blue)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--sp-navy)"; }}
           >
             Start AI Match
-          </button>
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>

@@ -1,136 +1,128 @@
 "use client";
 
 import React from "react";
-import { 
-  BookOpen, 
-  Video, 
-  MessageSquare, 
-  Star, 
-  CheckCircle,
-  ArrowRight,
-  Sparkles,
-  Users
-} from "lucide-react";
+import { Video, MessageSquare, CheckCircle, Users, Star } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 const SUBJECTS = [
-  { name: "Mathematics", icon: "∑", color: "bg-blue-100 text-blue-600", image: "/images/advanced-mathematics.png" },
-  { name: "Science", icon: "⚛", color: "bg-green-100 text-green-600", image: "/images/physics-lab-experiments.png" },
-  { name: "Languages", icon: "Aa", color: "bg-purple-100 text-purple-600", image: "/images/spanish-teacher-portrait.jpg" },
-  { name: "Coding", icon: "</>", color: "bg-orange-100 text-orange-600", image: "/images/python-programming-for-kids.png" }
+  { name: "Mathematics",  image: "/images/advanced-mathematics.png",    label: "∑" },
+  { name: "Sciences",     image: "/images/physics-lab-experiments.png", label: "⚗" },
+  { name: "Languages",    image: "/images/spanish-teacher-portrait.jpg",label: "Aa" },
+  { name: "Coding",       image: "/images/python-programming-for-kids.png", label: "</>" },
+];
+
+const TOOLS = [
+  { icon: CheckCircle,   label: "Screen Sharing" },
+  { icon: MessageSquare, label: "24/7 Chat Support" },
+  { icon: Users,         label: "Group Study Rooms" },
 ];
 
 export default function K12TutoringSection() {
   return (
-    <section className="py-20 bg-slate-50 relative overflow-hidden">
-      {/* Subtle Pattern */}
-      <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] pointer-events-none" />
-      
-      <div className="container relative z-10 px-4 mx-auto">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
-          <Badge className="bg-slate-900 text-white border-0 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em]">
+    <section className="section-py bg-white relative overflow-hidden">
+      <div className="container">
+
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span
+            className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest text-white mb-4"
+            style={{ background: "var(--sp-navy)" }}
+          >
             Live Tutoring
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-display font-black text-slate-950 leading-tight">
-            Certified Experts for <br />
-            <span className="text-blue-600">Every Student.</span>
+          </span>
+          <h2 className="section-title">
+            Certified Experts for{" "}
+            <span style={{ color: "var(--sp-blue)" }}>Every Student.</span>
           </h2>
-          <p className="text-lg text-slate-600 font-semibold">
-            One-on-one sessions, small group workshops, and 24/7 AI homework assistance.
+          <p className="section-sub mx-auto mt-3">
+            One-on-one sessions, small group workshops, and AI-powered homework assistance available around the clock.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6">
-          {SUBJECTS.map((subject, i) => (
-            <div
-              key={i}
-              className="group bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-              style={{ animation: `fadeIn 0.6s ease-out ${i * 0.1}s both` }}
+        {/* Subject cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+          {SUBJECTS.map((subject) => (
+            <article
+              key={subject.name}
+              className="group rounded-xl border overflow-hidden bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              style={{ borderColor: "var(--sp-border)" }}
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative h-40 overflow-hidden bg-slate-100">
                 <Image
-                  src={subject.image} 
-                  alt={subject.name} 
+                  src={subject.image}
+                  alt={`${subject.name} tutoring`}
                   fill
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-colors" />
-                <div className={`absolute top-4 left-4 ${subject.color} w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-lg`}>
-                  {subject.icon}
+                <div className="absolute inset-0 bg-[var(--sp-ink)]/20 group-hover:bg-[var(--sp-ink)]/30 transition-colors" aria-hidden="true" />
+                <div
+                  className="absolute top-3 left-3 w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-black bg-white shadow-md"
+                  style={{ color: "var(--sp-blue)" }}
+                  aria-hidden="true"
+                >
+                  {subject.label}
                 </div>
               </div>
-              
-              <div className="p-6 space-y-4 text-center">
-                <h3 className="text-xl font-black text-slate-950">{subject.name}</h3>
-                <div className="flex items-center justify-center gap-1.5 text-slate-400">
-                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-xs font-bold text-slate-500">4.9/5 (2k+ sessions)</span>
+
+              <div className="p-5">
+                <h3 className="text-[15px] font-bold mb-1" style={{ color: "var(--sp-ink)" }}>{subject.name}</h3>
+                <div className="flex items-center gap-1 mb-4">
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  <span className="text-[12px] font-semibold" style={{ color: "var(--sp-muted)" }}>4.9 · 2,000+ sessions</span>
                 </div>
-                <Button variant="ghost" className="w-full rounded-xl font-black text-[10px] uppercase tracking-widest text-blue-600 hover:bg-blue-50">
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center text-[12px] font-bold transition-colors"
+                  style={{ color: "var(--sp-blue)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sp-navy)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sp-blue)"; }}
+                >
                   View Tutors
-                </Button>
+                </Link>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
-        {/* Feature Bar — light theme */}
+        {/* Feature banner */}
         <div
-          className="mt-16 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden border shadow-xl"
+          className="rounded-2xl p-8 lg:p-10 border"
           style={{
-            background: "linear-gradient(135deg, #EBF5FA 0%, #F8FAFC 45%, #F3EEF8 100%)",
-            borderColor: "#E8EDF2",
-            boxShadow: "0 20px 50px rgba(40,132,171,.1), 0 4px 16px rgba(0,0,0,.04)",
+            background: "var(--sp-blue-light)",
+            borderColor: "rgba(40,132,171,.15)",
           }}
         >
-          <div
-            className="absolute top-0 right-0 w-72 h-72 rounded-full blur-[90px] pointer-events-none opacity-60 -translate-y-1/3 translate-x-1/4"
-            style={{ background: "rgba(40,132,171,.18)" }}
-          />
-          <div
-            className="absolute bottom-0 left-0 w-56 h-56 rounded-full blur-[70px] pointer-events-none opacity-40 translate-y-1/3 -translate-x-1/4"
-            style={{ background: "rgba(134,101,170,.15)" }}
-          />
-
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-12">
-            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
               <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, var(--sp-blue) 0%, var(--sp-blue-deep) 100%)" }}
+                className="w-14 h-14 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                style={{ background: "var(--sp-navy)" }}
+                aria-hidden="true"
               >
-                <Video className="w-8 h-8" />
+                <Video className="w-7 h-7" />
               </div>
               <div>
-                <h4 className="text-2xl font-black leading-tight" style={{ color: "var(--sp-ink)" }}>
+                <h4 className="text-[1.125rem] font-bold" style={{ color: "var(--sp-ink)" }}>
                   Interactive Virtual Classroom
                 </h4>
-                <p className="font-semibold text-sm mt-1" style={{ color: "var(--sp-muted)" }}>
-                  HD video, digital whiteboard & recording — all in one place.
+                <p className="text-[13px] font-medium mt-0.5" style={{ color: "var(--sp-muted)" }}>
+                  HD video, digital whiteboard, and session recordings — all in one place.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3">
-              {[
-                { icon: <CheckCircle className="w-4 h-4" style={{ color: "var(--sp-blue)" }} />, text: "Screen Sharing" },
-                { icon: <MessageSquare className="w-4 h-4" style={{ color: "var(--sp-purple)" }} />, text: "24/7 Chat" },
-                { icon: <Users className="w-4 h-4" style={{ color: "var(--sp-orange)" }} />, text: "Group Study" },
-              ].map((f, i) => (
+            <div className="flex flex-wrap justify-center gap-2.5" role="list" aria-label="Classroom features">
+              {TOOLS.map(({ icon: Icon, label }) => (
                 <div
-                  key={i}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full border bg-white/90 backdrop-blur-sm shadow-sm"
-                  style={{ borderColor: "rgba(232,237,242,.95)" }}
+                  key={label}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border bg-white"
+                  style={{ borderColor: "var(--sp-border)" }}
+                  role="listitem"
                 >
-                  {f.icon}
-                  <span
-                    className="font-bold text-[10px] uppercase tracking-widest"
-                    style={{ color: "var(--sp-ink)" }}
-                  >
-                    {f.text}
-                  </span>
+                  <Icon className="w-3.5 h-3.5" style={{ color: "var(--sp-blue)" }} aria-hidden="true" />
+                  <span className="text-[12px] font-semibold" style={{ color: "var(--sp-ink)" }}>{label}</span>
                 </div>
               ))}
             </div>

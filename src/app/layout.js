@@ -34,7 +34,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-white">
       <head>
         {/* Preconnect to speed up font loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

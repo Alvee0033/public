@@ -2,60 +2,42 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { 
-  Building2, 
-  MapPin, 
-  GraduationCap, 
-  ArrowRight,
-  ShieldCheck,
-  Star,
-  Users,
-  Globe as GlobeIcon
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Building2, ArrowRight, ShieldCheck, Users, Globe } from "lucide-react";
 import axios from "@/lib/axios";
 
 interface Institute {
   id: string;
-  institute_id?: string;
   name: string;
-  institute_name?: string;
-  master_institute_type?: { name: string };
-  courses_offering?: number;
+  type: string;
+  courses: number;
 }
+
+const GLOBAL_STATS = [
+  { label: "Global Schools",      val: "500+",  icon: Globe },
+  { label: "Verified Partners",   val: "100%",  icon: ShieldCheck },
+  { label: "Student Placements",  val: "150K+", icon: Users },
+];
 
 export default function InstitutesMarketplaceSection() {
   const [institutes, setInstitutes] = useState<Institute[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]       = useState(true);
 
   useEffect(() => {
     async function fetchInstitutes() {
       try {
-        const res = await axios.get("/learning-hub", {
-          params: { limit: 8, page: 1 },
-        });
-
+        const res = await axios.get("/learning-hub", { params: { limit: 8, page: 1 } });
         const rawData = res?.data?.data;
-        const hubs = Array.isArray(rawData)
-          ? rawData
-          : Array.isArray(rawData?.items)
-            ? rawData.items
-            : [];
+        const hubs    = Array.isArray(rawData) ? rawData : Array.isArray(rawData?.items) ? rawData.items : [];
 
         const items = hubs.slice(0, 4).map((hub: any) => ({
-          id: String(hub.id || ""),
-          name: hub.hub_name || hub.name || "Learning Hub",
-          master_institute_type: {
-            name: hub.hub_class_label || "Learning Hub",
-          },
-          courses_offering: Array.isArray(hub.services_offered)
-            ? hub.services_offered.length
-            : 0,
+          id:      String(hub.id || ""),
+          name:    hub.hub_name || hub.name || "Learning Hub",
+          type:    hub.hub_class_label || "Learning Hub",
+          courses: Array.isArray(hub.services_offered) ? hub.services_offered.length : 0,
         }));
 
-        setInstitutes(items.filter((inst: Institute) => inst.id));
-      } catch (err) {
-        console.error("Error fetching learning hubs:", err);
+        setInstitutes(items.filter((i: Institute) => i.id));
+      } catch {
         setInstitutes([]);
       } finally {
         setLoading(false);
@@ -65,93 +47,121 @@ export default function InstitutesMarketplaceSection() {
   }, []);
 
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
-      <div className="container relative z-10 px-4 mx-auto">
-        
+    <section
+      className="section-py relative overflow-hidden"
+      style={{ background: "var(--sp-off)" }}
+    >
+      <div className="container">
+
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
-          <div className="space-y-4 max-w-2xl">
-            <Badge variant="default" className="bg-blue-50 text-blue-600 hover:bg-blue-50 border-0 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest flex items-center gap-2 w-fit">
-              <Building2 className="w-3.5 h-3.5" />
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+          <div className="max-w-xl">
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest mb-4"
+              style={{ background: "var(--sp-blue-light)", color: "var(--sp-navy)" }}
+            >
+              <Building2 className="w-3 h-3" aria-hidden="true" />
               Institutes Network
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-display font-black text-slate-950 leading-tight">
-              Top Tier <br />
-              <span className="text-blue-600">Educational Partners.</span>
+            </span>
+            <h2 className="section-title">
+              Top Tier{" "}
+              <span style={{ color: "var(--sp-blue)" }}>Educational Partners.</span>
             </h2>
-            <p className="text-lg text-slate-600 font-medium leading-relaxed">
+            <p className="section-sub mt-2">
               Connect with schools, colleges, and training centers across the globe. Streamlined admissions and scholarship tracking.
             </p>
           </div>
-          
-          <button type="button" className="h-14 px-8 rounded-2xl border-2 border-slate-900 text-slate-900 font-black text-xs uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-sm group">
+
+          <Link
+            href="/institutes"
+            className="inline-flex items-center gap-2 px-5 h-11 rounded-lg text-[13.5px] font-bold border-2 transition-all flex-shrink-0"
+            style={{ borderColor: "var(--sp-ink)", color: "var(--sp-ink)", background: "transparent" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sp-ink)"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sp-ink)"; }}
+          >
             Browse All Institutes
-            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </Link>
         </div>
 
-        {/* Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {loading ? (
-             Array(4).fill(0).map((_, i) => (
-                <div key={i} className="h-80 bg-slate-50 rounded-3xl animate-pulse border border-slate-100" />
-             ))
-          ) : (
-            institutes.map((inst, i) => (
+        {/* Cards grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-14" role="list" aria-label="Partner institutes">
+          {loading
+            ? Array(4).fill(0).map((_, i) => (
+                <div key={i} className="h-56 bg-white rounded-xl border animate-pulse" style={{ borderColor: "var(--sp-border)" }} role="listitem" />
+              ))
+            : institutes.map((inst, i) => (
+                <article
+                  key={inst.id}
+                  className="group flex flex-col items-center text-center p-7 bg-white rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  style={{ borderColor: "var(--sp-border)", animationDelay: `${i * 60}ms` }}
+                  role="listitem"
+                >
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 border transition-all duration-300 group-hover:border-[var(--sp-blue)] group-hover:text-[var(--sp-blue)]"
+                    style={{ background: "var(--sp-off)", borderColor: "var(--sp-border)", color: "var(--sp-muted)" }}
+                    aria-hidden="true"
+                  >
+                    <Building2 className="w-7 h-7" />
+                  </div>
+
+                  <h3 className="text-[14.5px] font-bold mb-1 line-clamp-2 group-hover:text-[var(--sp-blue)] transition-colors" style={{ color: "var(--sp-ink)" }}>
+                    {inst.name}
+                  </h3>
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-widest mb-4"
+                    style={{ color: "var(--sp-light)" }}
+                  >
+                    {inst.type}
+                  </span>
+
+                  <div className="w-full pt-4 border-t grid grid-cols-2 gap-4 mb-5" style={{ borderColor: "var(--sp-border)" }}>
+                    <div>
+                      <div className="text-[1.125rem] font-extrabold" style={{ color: "var(--sp-ink)" }}>{inst.courses || 12}</div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--sp-light)" }}>Courses</div>
+                    </div>
+                    <div>
+                      <div className="text-[1.125rem] font-extrabold" style={{ color: "var(--sp-ink)" }}>48</div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--sp-light)" }}>Scholars</div>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/institutes/${inst.id}`}
+                    className="w-full h-9 rounded-lg text-[12px] font-bold border transition-all inline-flex items-center justify-center"
+                    style={{ borderColor: "var(--sp-border)", color: "var(--sp-blue)", background: "var(--sp-blue-light)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sp-blue)"; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "var(--sp-blue-light)"; e.currentTarget.style.color = "var(--sp-blue)"; }}
+                  >
+                    View Profile
+                  </Link>
+                </article>
+              ))
+          }
+        </div>
+
+        {/* Global stats strip */}
+        <div
+          className="flex flex-wrap justify-center gap-10 lg:gap-20 py-6 rounded-2xl border"
+          style={{ background: "white", borderColor: "var(--sp-border)" }}
+          aria-label="Global statistics"
+        >
+          {GLOBAL_STATS.map(({ label, val, icon: Icon }) => (
+            <div key={label} className="flex items-center gap-3">
               <div
-                key={inst.id}
-                className="group bg-slate-50 rounded-[2.5rem] p-8 border border-slate-100 hover:bg-white hover:shadow-2xl transition-all duration-500 flex flex-col items-center text-center space-y-6"
-                style={{ animation: `fadeIn 0.5s ease-out ${i * 0.1}s both` }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center border"
+                style={{ background: "var(--sp-off)", borderColor: "var(--sp-border)", color: "var(--sp-blue)" }}
+                aria-hidden="true"
               >
-                <div className="w-20 h-20 rounded-3xl bg-white shadow-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                  <Building2 className="w-10 h-10" />
-                </div>
-                
-                <div className="space-y-2">
-                   <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight group-hover:text-blue-600 transition-colors line-clamp-1">{inst.name}</h3>
-                   <div className="flex items-center justify-center gap-2">
-                     <Badge variant="outline" className="text-[8px] font-black border-slate-200 text-slate-400 uppercase tracking-widest">
-                        {inst.master_institute_type?.name || "Premium Partner"}
-                     </Badge>
-                   </div>
-                </div>
-
-                <div className="w-full pt-4 border-t border-slate-200/60 grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-lg font-black text-slate-950 tabular-nums">{inst.courses_offering || 12}</div>
-                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Courses</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-black text-slate-950 tabular-nums">48</div>
-                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Scholars</div>
-                  </div>
-                </div>
-
-                <Link href={`/institutes/${inst.id}`} className="w-full h-12 rounded-xl text-blue-600 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-50 inline-flex items-center justify-center">
-                  View Profile
-                </Link>
+                <Icon className="w-4.5 h-4.5" />
               </div>
-            ))
-          )}
+              <div>
+                <div className="text-[1.1875rem] font-extrabold tracking-tight" style={{ color: "var(--sp-ink)" }}>{val}</div>
+                <div className="stat-label">{label}</div>
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* Global Stats Bar */}
-        <div className="mt-20 flex flex-wrap justify-center gap-12 lg:gap-24 opacity-60">
-           {[
-             { label: "Global Schools", val: "500+", icon: <GlobeIcon className="w-5 h-5" /> },
-             { label: "Verified Partners", val: "100%", icon: <ShieldCheck className="w-5 h-5" /> },
-             { label: "Student Placements", val: "150K+", icon: <Users className="w-5 h-5" /> }
-           ].map((stat, i) => (
-             <div key={i} className="flex items-center gap-4">
-                <div className="p-3 bg-slate-50 rounded-2xl text-slate-900 border border-slate-100">{stat.icon}</div>
-                <div>
-                   <div className="text-xl font-black text-slate-950">{stat.val}</div>
-                   <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</div>
-                </div>
-             </div>
-           ))}
-        </div>
-
       </div>
     </section>
   );
